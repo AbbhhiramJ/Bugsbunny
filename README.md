@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BuggsBunny
 
 A self-improving bug-clustering loop on the Lemma pod. Bugs come in, get
@@ -21,3 +22,7 @@ BuggsBunny/
 ├── manifest.md   # human-readable resource manifest
 └── EXPORT_MANIFEST.md  # programmatic inventory of everything pulled from the pod
 ```
+=======
+# Bugsbunny
+AI-powered Engineering Intelligence Layer that transforms duplicate bug reports into engineer-ready incidents using explainable AI.
+>>>>>>> c75f30d1b0b087445c7ee8c4115c2d21bac5439e

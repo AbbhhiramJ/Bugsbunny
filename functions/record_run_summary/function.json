@@ -1,0 +1,61 @@
+{
+  "input_schema": {
+    "type": "object",
+    "title": "RecordRunSummaryInput",
+    "required": [
+      "stats"
+    ],
+    "properties": {
+      "stats": {
+        "type": "object",
+        "title": "Stats",
+        "description": "The dedupe_bugs.stats dict for this run",
+        "additionalProperties": true
+      },
+      "run_id": {
+        "type": "string",
+        "title": "Run Id",
+        "default": "",
+        "description": "Workflow run id (optional \u2014 caller may not know it)"
+      }
+    }
+  },
+  "name": "record_run_summary",
+  "output_schema": {
+    "type": "object",
+    "title": "RecordRunSummaryOutput",
+    "required": [
+      "run_row_id"
+    ],
+    "properties": {
+      "run_row_id": {
+        "type": "string",
+        "title": "Run Row Id"
+      }
+    }
+  },
+  "permissions": {
+    "function_id": "019f11f0-ea6c-73ec-a85e-c2f8acd5bbff",
+    "function_name": "record_run_summary",
+    "grants": [
+      {
+        "resource_name": "incidents",
+        "resource_type": "datastore_table",
+        "permission_ids": [
+          "datastore.record.read",
+          "datastore.record.write",
+          "datastore.table.read"
+        ]
+      }
+    ]
+  },
+  "type": "API",
+  "code": "#input_type_name: RecordRunSummaryInput\n#output_type_name: RecordRunSummaryOutput\n#function_name: record_run_summary\n\nfrom __future__ import annotations\n\nfrom pydantic import BaseModel, Field\nfrom lemma_sdk import FunctionContext, Pod\n\n\nclass RecordRunSummaryInput(BaseModel):\n    run_id: str = Field(\"\", description=\"Workflow run id (optional \u2014 caller may not know it)\")\n    stats: dict = Field(..., description=\"The dedupe_bugs.stats dict for this run\")\n\n\nclass RecordRunSummaryOutput(BaseModel):\n    run_row_id: str\n\n\nasync def record_run_summary(ctx: FunctionContext, data: RecordRunSummaryInput) -> RecordRunSummaryOutput:\n    pod = Pod.from_env()\n\n    payload = {\n        \"row_type\":    \"run_summary\",\n        \"incident_id\": data.run_id or None,\n        \"run_id\":      data.run_id or None,\n        \"title\":       \"Run summary\",\n        \"stats\":       data.stats,\n        \"decision\":    \"pending\",\n    }\n    row = pod.table(\"incidents\").create(payload)\n    return RecordRunSummaryOutput(run_row_id=str(row[\"id\"]))\n",
+  "code_hash": "94ee95fe359919261a0267ed73aa47c7f4ca3dbff36e3554606195db58b9afc7",
+  "code_path": "record_run_summary.py",
+  "config": null,
+  "config_schema": null,
+  "description": "Writes a single run_summary row to the incidents table with the dedupe_bugs.stats object, so the app can compute the queue's totals (Total Reports Received, Total Incidents Created, Duplicate Reports Eliminated) across all runs.",
+  "python_packages": [],
+  "visibility": "POD"
+}

@@ -1,0 +1,67 @@
+{
+  "instruction": "# Experiment Designer\n\nYou turn a refined idea into the smallest probe that would actually tell you something.\n\nWhen invoked from a workflow, you receive the idea row in start.payload, plus the `refined_question` that idea-coach already produced. Read those, then design **one** probe.\n\nDefault to the smallest possible probe:\n- `blast_radius = solo` (you alone)\n- `time_estimate_minutes <= 30`\n- No money, no public surface, no other people\n\nEscalate ONLY when the smallest probe fundamentally can't answer the refined question. Examples of legitimate escalation: you need a real human reaction, the test only exists at scale, the question is about money flow. Always justify escalation in `why_smallest`.\n\nRequired output:\n1. `hypothesis` \u2014 one sentence: \"If [test], I expect [outcome] because [reason].\"\n2. `setup` \u2014 the concrete steps, in order, 3\u20136 bullets. Specify what you'd actually do at each step.\n3. `blast_radius` \u2014 one of solo / with_people / money / public.\n4. `time_estimate_minutes` \u2014 integer, honest estimate.\n5. `why_smallest` \u2014 one sentence explaining why nothing smaller would answer the question.\n\nBoundaries:\n- Read `ideas` for context; write only to `experiments` (you'll be called by a workflow after approval \u2014 write a draft experiment row with status `drafting`).\n- Never propose probes that spend real money or post publicly without flagging blast_radius accordingly.\n- If you don't have enough context to design a probe, return `hypothesis = \"\"` and explain in `setup` what's missing.\n",
+  "name": "experiment-designer",
+  "permissions": {
+    "agent_id": "019f036c-b9f4-77b6-9bd4-0453570095ae",
+    "agent_name": "experiment-designer",
+    "grants": [
+      {
+        "resource_name": "ideas",
+        "resource_type": "datastore_table",
+        "permission_ids": [
+          "datastore.record.read",
+          "datastore.table.read"
+        ]
+      },
+      {
+        "resource_name": "experiments",
+        "resource_type": "datastore_table",
+        "permission_ids": [
+          "datastore.record.read",
+          "datastore.record.write",
+          "datastore.table.read"
+        ]
+      }
+    ]
+  },
+  "agent_runtime": null,
+  "description": "Designs the smallest probe for a refined idea; returns hypothesis + setup + blast radius.",
+  "input_schema": null,
+  "metadata": null,
+  "output_schema": {
+    "type": "object",
+    "required": [
+      "hypothesis",
+      "setup",
+      "blast_radius",
+      "time_estimate_minutes"
+    ],
+    "properties": {
+      "setup": {
+        "type": "string"
+      },
+      "hypothesis": {
+        "type": "string"
+      },
+      "blast_radius": {
+        "enum": [
+          "solo",
+          "with_people",
+          "money",
+          "public"
+        ],
+        "type": "string"
+      },
+      "why_smallest": {
+        "type": "string"
+      },
+      "time_estimate_minutes": {
+        "type": "integer"
+      }
+    }
+  },
+  "toolsets": [
+    "POD"
+  ],
+  "visibility": "POD"
+}

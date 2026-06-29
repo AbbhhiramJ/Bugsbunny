@@ -1,0 +1,434 @@
+{
+  "bugs": [
+    {
+      "id": "B001",
+      "title": "Checkout button crashes the page",
+      "body": "Clicking the checkout button on the cart screen throws a 500 error and the entire page goes blank. Repro: add any item, go to cart, click checkout.",
+      "error_code": "E_CHECKOUT_500",
+      "component": "checkout",
+      "stack_trace": "Traceback (most recent call last):\\n  File \"checkout.py\", line 127\\n    charge(user)\\nTypeError: charge() got NoneType",
+      "repro_steps": "1. Add item to cart\\n2. Click checkout\\n3. Page crashes",
+      "reporter": "alice",
+      "vote_count": 12,
+      "comment_count": 7,
+      "created_at": "2025-01-04T09:14"
+    },
+    {
+      "id": "B002",
+      "title": "Internal server error when paying",
+      "body": "Pay-now returns a server error and the page becomes unresponsive. Same on mobile and desktop.",
+      "error_code": "E_CHECKOUT_500",
+      "component": "checkout",
+      "stack_trace": "Traceback (most recent call last):\\n  File \"checkout.py\", line 127\\n    charge(user)\\nTypeError: charge() got NoneType",
+      "reporter": "bob",
+      "vote_count": 3,
+      "comment_count": 1,
+      "created_at": "2025-01-05T11:02"
+    },
+    {
+      "id": "B003",
+      "title": "pay now blank page",
+      "body": "pay now button produces blank page. happened twice today. very annoying.",
+      "component": "checkout",
+      "reporter": "carol",
+      "vote_count": 1,
+      "comment_count": 0,
+      "created_at": "2025-01-06T08:30"
+    },
+    {
+      "id": "B010",
+      "title": "Safari does not retain session cookie after login",
+      "body": "After logging in on Safari 17 the session cookie is never set, kicking the user back to login on the next request.",
+      "component": "auth",
+      "error_code": "E_AUTH_COOKIE_MISSING",
+      "stack_trace": "at AuthService.setCookie (auth.js:204)\\nat AuthController.login (auth.js:88)",
+      "reporter": "dave",
+      "vote_count": 9,
+      "comment_count": 4,
+      "created_at": "2025-01-08T10:11"
+    },
+    {
+      "id": "B011",
+      "title": "users logged out immediately in Safari",
+      "body": "Login succeeds but the user is logged out on next page load. Only affects Safari desktop.",
+      "component": "auth",
+      "error_code": "E_AUTH_COOKIE_MISSING",
+      "stack_trace": "at AuthService.setCookie (auth.js:204)\\nat AuthController.login (auth.js:88)",
+      "repro_steps": "1. Open in Safari\\n2. Log in\\n3. Refresh \u2014 logged out",
+      "reporter": "erin",
+      "vote_count": 4,
+      "comment_count": 2,
+      "created_at": "2025-01-08T13:45"
+    },
+    {
+      "id": "B012",
+      "title": "session cookie missing in webkit",
+      "body": "webkit-based browsers fail to set the auth cookie after sign-in.",
+      "component": "auth",
+      "reporter": "frank",
+      "vote_count": 2,
+      "comment_count": 0,
+      "created_at": "2025-01-09T07:50"
+    },
+    {
+      "id": "B020",
+      "title": "uploading a PNG larger than 5MB hangs",
+      "body": "Uploading any PNG over 5 MB hangs the upload bar forever. No error, no progress.",
+      "component": "upload",
+      "error_code": "E_UPLOAD_TIMEOUT",
+      "stack_trace": "at UploadController.handle (upload.js:312)\\nat timeout",
+      "reporter": "gabe",
+      "vote_count": 6,
+      "comment_count": 3,
+      "created_at": "2025-01-10T12:00"
+    },
+    {
+      "id": "B021",
+      "title": "PNG upload stuck above 5 megabytes",
+      "body": "Large PNG files cause the upload to hang indefinitely. No progress and no error message ever shown.",
+      "component": "upload",
+      "reporter": "helen",
+      "vote_count": 1,
+      "comment_count": 1,
+      "created_at": "2025-01-11T09:15"
+    },
+    {
+      "id": "B030",
+      "title": "dark mode renders serif font on titles",
+      "body": "Switching to dark mode breaks headline font \u2014 falls back to a serif where it should be sans-serif.",
+      "component": "ui",
+      "error_code": "E_THEME_FONT",
+      "reporter": "ivan",
+      "vote_count": 7,
+      "comment_count": 2,
+      "created_at": "2025-01-12T14:00"
+    },
+    {
+      "id": "B031",
+      "title": "headlines wrong font when dark theme active",
+      "body": "Dark theme causes the heading font to revert to a serif typeface. Body stays sans-serif, only headlines regress.",
+      "component": "ui",
+      "reporter": "jane",
+      "vote_count": 2,
+      "comment_count": 0,
+      "created_at": "2025-01-13T09:00"
+    },
+    {
+      "id": "B040",
+      "title": "search returns 500 if query contains slash",
+      "body": "Searching for any term that contains a forward slash returns a 500 error.",
+      "error_code": "HTTP_500",
+      "component": "search",
+      "stack_trace": "java.lang.IllegalArgumentException at SearchController.parse (SearchController.java:48)",
+      "reporter": "kim",
+      "vote_count": 11,
+      "comment_count": 5,
+      "created_at": "2025-01-15T11:00"
+    },
+    {
+      "id": "B041",
+      "title": "500 on search with /",
+      "body": "Any search query containing the character / produces a server error.",
+      "error_code": "HTTP_500",
+      "component": "search",
+      "reporter": "liam",
+      "vote_count": 4,
+      "comment_count": 1,
+      "created_at": "2025-01-15T15:00"
+    },
+    {
+      "id": "B050",
+      "title": "push notifications duplicate fire on Android",
+      "body": "On Android, push notifications fire twice for the same event. iOS is fine.",
+      "component": "notifications",
+      "error_code": "E_NOTIF_DOUBLE",
+      "reporter": "maya",
+      "vote_count": 3,
+      "comment_count": 2,
+      "created_at": "2025-01-17T16:00"
+    },
+    {
+      "id": "B051",
+      "title": "android push duplicates",
+      "body": "android delivers the same push notification twice. iOS unaffected.",
+      "component": "notifications",
+      "reporter": "nate",
+      "vote_count": 0,
+      "comment_count": 0,
+      "created_at": "2025-01-18T08:00"
+    },
+    {
+      "id": "B060",
+      "title": "RTL languages clip right edge of cards",
+      "body": "Arabic and Hebrew layouts clip the right edge of product cards. Looks fine in LTR.",
+      "component": "i18n",
+      "error_code": "E_LAYOUT_RTL",
+      "reporter": "omar",
+      "vote_count": 2,
+      "comment_count": 1,
+      "created_at": "2025-01-19T19:00"
+    },
+    {
+      "id": "B061",
+      "title": "product cards clipped in RTL",
+      "body": "Cards have their right side cut off in right-to-left languages (Arabic/Hebrew).",
+      "component": "i18n",
+      "reporter": "priya",
+      "vote_count": 0,
+      "comment_count": 0,
+      "created_at": "2025-01-20T07:00"
+    },
+    {
+      "id": "B070",
+      "title": "CSV export omits last column on Windows",
+      "body": "Downloaded CSV on Windows Excel is missing the last column. Other platforms fine.",
+      "component": "export",
+      "error_code": "E_CSV_TRUNC",
+      "reporter": "quinn",
+      "vote_count": 5,
+      "comment_count": 2,
+      "created_at": "2025-01-21T11:00"
+    },
+    {
+      "id": "B071",
+      "title": "excel drops last column from CSV export",
+      "body": "The CSV download loses its last column when opened in Excel on Windows.",
+      "component": "export",
+      "reporter": "rose",
+      "vote_count": 1,
+      "comment_count": 0,
+      "created_at": "2025-01-21T13:00"
+    },
+    {
+      "id": "B080",
+      "title": "webhook retry doubles charge on flaky networks",
+      "body": "Webhook retries on flaky-network response cause the customer to be charged twice.",
+      "component": "webhooks",
+      "error_code": "E_DOUBLE_CHARGE",
+      "reporter": "sam",
+      "vote_count": 14,
+      "comment_count": 6,
+      "created_at": "2025-01-22T22:00"
+    },
+    {
+      "id": "B081",
+      "title": "customer charged twice on flaky webhook retry",
+      "body": "Customer says they were billed twice because the webhook fired twice.",
+      "component": "webhooks",
+      "reporter": "tara",
+      "vote_count": 3,
+      "comment_count": 1,
+      "created_at": "2025-01-22T22:05"
+    },
+    {
+      "id": "B090",
+      "title": "ISO8601 with Z fails to parse",
+      "body": "Timestamps with a trailing Z fail to parse. Without Z works. Affects event ingest.",
+      "component": "parser",
+      "error_code": "E_PARSE_TS_Z",
+      "reporter": "uma",
+      "vote_count": 6,
+      "comment_count": 2,
+      "created_at": "2025-01-23T10:00"
+    },
+    {
+      "id": "B091",
+      "title": "event ingest rejects UTC Z timestamps",
+      "body": "Event ingest rejects ISO8601 timestamps with a trailing Z. Local time works.",
+      "component": "parser",
+      "reporter": "vince",
+      "vote_count": 1,
+      "comment_count": 0,
+      "created_at": "2025-01-23T12:00"
+    },
+    {
+      "id": "B100",
+      "title": "primary button text invisible on hover",
+      "body": "On hover the text inside the primary button becomes the same color as the background.",
+      "component": "ui",
+      "reporter": "wendy",
+      "vote_count": 4,
+      "comment_count": 1,
+      "created_at": "2025-02-01T09:00"
+    },
+    {
+      "id": "B101",
+      "title": "hovering main CTA hides label text",
+      "body": "On hover, the label text of the main call-to-action button turns invisible against the background.",
+      "component": "ui",
+      "reporter": "xavier",
+      "vote_count": 0,
+      "comment_count": 0,
+      "created_at": "2025-02-01T11:00"
+    },
+    {
+      "id": "B110",
+      "title": "downloading report truncates after 100MB",
+      "body": "Report downloads truncate beyond 100 MB without warning.",
+      "component": "download",
+      "reporter": "yana",
+      "vote_count": 3,
+      "comment_count": 2,
+      "created_at": "2025-02-03T14:00"
+    },
+    {
+      "id": "B111",
+      "title": "large report downloads silently truncated",
+      "body": "Anything over 100 MB appears to silently cap when downloading a report.",
+      "component": "download",
+      "reporter": "zac",
+      "vote_count": 1,
+      "comment_count": 0,
+      "created_at": "2025-02-04T08:00"
+    },
+    {
+      "id": "S001",
+      "title": "install fails on Ubuntu 24.04",
+      "body": "apt install of the linux package fails on Ubuntu 24.04 due to glibc version.",
+      "component": "install",
+      "reporter": "aaron",
+      "vote_count": 3,
+      "created_at": "2025-02-05T08:00"
+    },
+    {
+      "id": "S002",
+      "title": "API endpoint /v2/users returns 404",
+      "body": "/v2/users returns 404 even for active accounts.",
+      "component": "api",
+      "error_code": "HTTP_404",
+      "reporter": "beth",
+      "vote_count": 6,
+      "created_at": "2025-02-05T10:00"
+    },
+    {
+      "id": "S003",
+      "title": "billing email missing company name",
+      "body": "Billing receipts omit the company name on the invoice header.",
+      "component": "billing",
+      "reporter": "cyrus",
+      "vote_count": 1,
+      "created_at": "2025-02-06T09:00"
+    },
+    {
+      "id": "S004",
+      "title": "admin dashboard pagination off-by-one",
+      "body": "Pagination links on the admin dashboard skip the last page.",
+      "component": "admin",
+      "reporter": "diana",
+      "vote_count": 2,
+      "created_at": "2025-02-06T11:00"
+    },
+    {
+      "id": "S005",
+      "title": "metrics endpoint exposed to non-admins",
+      "body": "Internal metrics endpoint is reachable without admin role.",
+      "component": "security",
+      "reporter": "eli",
+      "vote_count": 9,
+      "created_at": "2025-02-06T15:00"
+    },
+    {
+      "id": "S006",
+      "title": "CSV import rejects negative numbers",
+      "body": "Importing a CSV with negative numeric values fails.",
+      "component": "import",
+      "reporter": "fiona",
+      "vote_count": 0,
+      "created_at": "2025-02-07T08:00"
+    },
+    {
+      "id": "S007",
+      "title": "profile photo rotation lost",
+      "body": "EXIF rotation is dropped on profile photo upload.",
+      "component": "upload",
+      "reporter": "greg",
+      "vote_count": 4,
+      "created_at": "2025-02-07T10:00"
+    },
+    {
+      "id": "S008",
+      "title": "calendar widget missing keyboard focus ring",
+      "body": "Calendar date picker has no visible focus indicator when tabbed to.",
+      "component": "ui",
+      "reporter": "harry",
+      "vote_count": 3,
+      "created_at": "2025-02-07T14:00"
+    }
+  ],
+  "ground_truth_clusters": [
+    [
+      "B001",
+      "B002",
+      "B003"
+    ],
+    [
+      "B010",
+      "B011",
+      "B012"
+    ],
+    [
+      "B020",
+      "B021"
+    ],
+    [
+      "B030",
+      "B031"
+    ],
+    [
+      "B040",
+      "B041"
+    ],
+    [
+      "B050",
+      "B051"
+    ],
+    [
+      "B060",
+      "B061"
+    ],
+    [
+      "B070",
+      "B071"
+    ],
+    [
+      "B080",
+      "B081"
+    ],
+    [
+      "B090",
+      "B091"
+    ],
+    [
+      "B100",
+      "B101"
+    ],
+    [
+      "B110",
+      "B111"
+    ],
+    [
+      "S001"
+    ],
+    [
+      "S002"
+    ],
+    [
+      "S003"
+    ],
+    [
+      "S004"
+    ],
+    [
+      "S005"
+    ],
+    [
+      "S006"
+    ],
+    [
+      "S007"
+    ],
+    [
+      "S008"
+    ]
+  ]
+}

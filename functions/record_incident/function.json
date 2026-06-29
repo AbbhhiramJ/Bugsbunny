@@ -1,0 +1,103 @@
+{
+  "input_schema": {
+    "type": "object",
+    "title": "RecordIncidentInput",
+    "required": [
+      "cluster_id",
+      "cluster_bug_ids",
+      "agent_output"
+    ],
+    "properties": {
+      "run_id": {
+        "type": "string",
+        "title": "Run Id",
+        "default": "",
+        "description": "Workflow run id (optional \u2014 caller may not know it)"
+      },
+      "all_bugs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "title": "All Bugs",
+        "description": "Full batch passed to the workflow"
+      },
+      "cluster_id": {
+        "type": "string",
+        "title": "Cluster Id",
+        "description": "Dedup cluster id (e.g. dup-001)"
+      },
+      "confidence": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Confidence",
+        "default": null,
+        "description": "Cluster confidence from dedupe_bugs (high|medium|low)"
+      },
+      "agent_output": {
+        "type": "object",
+        "title": "Agent Output",
+        "description": "Structured agent output (10 fields)",
+        "additionalProperties": true
+      },
+      "cluster_bug_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "title": "Cluster Bug Ids",
+        "description": "Bug ids in this cluster"
+      }
+    }
+  },
+  "name": "record_incident",
+  "output_schema": {
+    "type": "object",
+    "title": "RecordIncidentOutput",
+    "required": [
+      "incident_row_id",
+      "bug_count"
+    ],
+    "properties": {
+      "bug_count": {
+        "type": "integer",
+        "title": "Bug Count"
+      },
+      "incident_row_id": {
+        "type": "string",
+        "title": "Incident Row Id"
+      }
+    }
+  },
+  "permissions": {
+    "function_id": "019f11f0-8f68-717e-bd61-92c8c69c2563",
+    "function_name": "record_incident",
+    "grants": [
+      {
+        "resource_name": "incidents",
+        "resource_type": "datastore_table",
+        "permission_ids": [
+          "datastore.record.read",
+          "datastore.record.write",
+          "datastore.table.read"
+        ]
+      }
+    ]
+  },
+  "type": "API",
+  "code": "#input_type_name: RecordIncidentInput\n#output_type_name: RecordIncidentOutput\n#function_name: record_incident\n\nfrom __future__ import annotations\n\nfrom pydantic import BaseModel, Field\nfrom lemma_sdk import FunctionContext, Pod\n\n\nclass RecordIncidentInput(BaseModel):\n    cluster_id: str = Field(..., description=\"Dedup cluster id (e.g. dup-001)\")\n    run_id: str = Field(\"\", description=\"Workflow run id (optional \u2014 caller may not know it)\")\n    confidence: str | None = Field(None, description=\"Cluster confidence from dedupe_bugs (high|medium|low)\")\n    cluster_bug_ids: list[str] = Field(..., description=\"Bug ids in this cluster\")\n    all_bugs: list[dict] = Field(default_factory=list, description=\"Full batch passed to the workflow\")\n    agent_output: dict = Field(..., description=\"Structured agent output (10 fields)\")\n\n\nclass RecordIncidentOutput(BaseModel):\n    incident_row_id: str\n    bug_count: int\n\n\nasync def record_incident(ctx: FunctionContext, data: RecordIncidentInput) -> RecordIncidentOutput:\n    pod = Pod.from_env()\n\n    # Filter bug dicts down to just the cluster members.\n    ids = set(data.cluster_bug_ids)\n    original_reports = [b for b in data.all_bugs if b.get(\"id\") in ids]\n\n    payload = dict(data.agent_output)\n    payload.update({\n        \"row_type\":              \"incident\",\n        \"confidence\":            data.confidence,\n        \"incident_id\":           data.cluster_id,\n        \"run_id\":                data.run_id or None,\n        \"bug_count\":             len(data.cluster_bug_ids),\n        \"bug_ids\":               data.cluster_bug_ids,\n        \"original_reports\":      original_reports,\n        \"decision\":              \"pending\",  # in-memory on the app side\n    })\n\n    row = pod.table(\"incidents\").create(payload)\n    return RecordIncidentOutput(\n        incident_row_id=str(row[\"id\"]),\n        bug_count=len(data.cluster_bug_ids),\n    )\n",
+  "code_hash": "f2185c527a5ed2e2ffec70ec04fb81c5bbe17f9d91cbcc146d93a1fe7a3e76a1",
+  "code_path": "record_incident.py",
+  "config": null,
+  "config_schema": null,
+  "description": "Writes one row to the incidents table for a single cluster incident produced by the buggs-incident-triage workflow. Pulls the agent's structured output plus the cluster's bug ids and the full bug dicts.",
+  "python_packages": [],
+  "visibility": "POD"
+}

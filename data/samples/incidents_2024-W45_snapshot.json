@@ -1,0 +1,5 @@
+{
+  "comment": "Snapshot of the `incidents` table at export time. Live source of truth is /me/incidents on the pod.",
+  "exported_at": "2024-11-08T09:50:00Z",
+  "row_count_when_exported": 5
+}

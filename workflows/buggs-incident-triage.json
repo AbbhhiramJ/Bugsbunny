@@ -1,0 +1,209 @@
+{
+  "name": "buggs-incident-triage",
+  "description": "Takes a batch of bug reports, runs dedupe_bugs to cluster duplicates, persists the run summary, runs each cluster through the incident-analyst agent, and writes each resulting incident into the incidents table for the Incident Review Queue app.",
+  "edges": [
+    {
+      "id": "e-intake-dedupe",
+      "source": "bugs_batch",
+      "target": "dedupe_bugs",
+      "label": null
+    },
+    {
+      "id": "e-dedupe-rs",
+      "source": "dedupe_bugs",
+      "target": "record_run_summary",
+      "label": null
+    },
+    {
+      "id": "e-rs-loop",
+      "source": "record_run_summary",
+      "target": "cluster_loop",
+      "label": null
+    },
+    {
+      "id": "e-loop-end",
+      "source": "cluster_loop",
+      "target": "end",
+      "label": null
+    },
+    {
+      "id": "e-analyze-rinc",
+      "source": "analyze",
+      "target": "record_incident",
+      "label": null
+    },
+    {
+      "id": "e-rinc-loop",
+      "source": "record_incident",
+      "target": "cluster_loop",
+      "label": null
+    }
+  ],
+  "is_active": true,
+  "mode": "GLOBAL",
+  "nodes": [
+    {
+      "config": {
+        "input_schema": {
+          "type": "object",
+          "required": [
+            "bugs"
+          ],
+          "properties": {
+            "bugs": {
+              "type": "array",
+              "description": "Array of bug dicts"
+            },
+            "edges": {
+              "type": "array",
+              "default": [],
+              "description": "Optional edges"
+            }
+          }
+        },
+        "assignee_pod_member_id": null,
+        "assignee_pod_member_id_expression": null,
+        "ui_schema": null
+      },
+      "id": "bugs_batch",
+      "label": "Bugs batch",
+      "position": null,
+      "type": "FORM"
+    },
+    {
+      "config": {
+        "function_name": "dedupe_bugs",
+        "input_mapping": {
+          "bugs": {
+            "value": "bugs_batch.bugs",
+            "optional": false,
+            "type": "expression"
+          },
+          "edges": {
+            "value": "bugs_batch.edges",
+            "optional": false,
+            "type": "expression"
+          }
+        }
+      },
+      "id": "dedupe_bugs",
+      "label": "Dedupe bugs",
+      "position": null,
+      "type": "FUNCTION"
+    },
+    {
+      "config": {
+        "function_name": "record_run_summary",
+        "input_mapping": {
+          "stats": {
+            "value": "dedupe_bugs.stats",
+            "optional": false,
+            "type": "expression"
+          },
+          "run_id": {
+            "value": "",
+            "type": "literal"
+          }
+        }
+      },
+      "id": "record_run_summary",
+      "label": "Record run summary",
+      "position": null,
+      "type": "FUNCTION"
+    },
+    {
+      "config": {
+        "child_node_id": "analyze",
+        "items_path": "dedupe_bugs.clusters",
+        "item_var_name": "cluster"
+      },
+      "id": "cluster_loop",
+      "label": "Cluster loop",
+      "position": null,
+      "type": "LOOP"
+    },
+    {
+      "config": {
+        "agent_name": "incident-analyst",
+        "input_mapping": {
+          "cluster": {
+            "value": "loop.cluster",
+            "optional": false,
+            "type": "expression"
+          },
+          "all_bugs": {
+            "value": "bugs_batch.bugs",
+            "optional": false,
+            "type": "expression"
+          },
+          "all_edges": {
+            "value": "bugs_batch.edges",
+            "optional": false,
+            "type": "expression"
+          },
+          "confidence": {
+            "value": "loop.cluster.confidence",
+            "optional": false,
+            "type": "expression"
+          }
+        }
+      },
+      "id": "analyze",
+      "label": "Analyze cluster",
+      "position": null,
+      "type": "AGENT"
+    },
+    {
+      "config": {
+        "function_name": "record_incident",
+        "input_mapping": {
+          "run_id": {
+            "value": "",
+            "type": "literal"
+          },
+          "all_bugs": {
+            "value": "bugs_batch.bugs",
+            "optional": false,
+            "type": "expression"
+          },
+          "cluster_id": {
+            "value": "loop.cluster.cluster_id",
+            "optional": false,
+            "type": "expression"
+          },
+          "confidence": {
+            "value": "loop.cluster.confidence",
+            "optional": false,
+            "type": "expression"
+          },
+          "agent_output": {
+            "value": "analyze",
+            "optional": false,
+            "type": "expression"
+          },
+          "cluster_bug_ids": {
+            "value": "loop.cluster.bug_ids",
+            "optional": false,
+            "type": "expression"
+          }
+        }
+      },
+      "id": "record_incident",
+      "label": "Record incident",
+      "position": null,
+      "type": "FUNCTION"
+    },
+    {
+      "id": "end",
+      "config": {},
+      "label": "Done",
+      "position": null,
+      "type": "END"
+    }
+  ],
+  "start": {
+    "config": null,
+    "type": "MANUAL"
+  },
+  "visibility": "POD"
+}

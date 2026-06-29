@@ -1,0 +1,212 @@
+{
+  "name": "idea_to_experiment",
+  "description": "When a new idea lands in the ideas table: coach refines, designer drafts a smallest probe, human approves or parks, then record_experiment persists.",
+  "edges": [
+    {
+      "id": "e1",
+      "source": "coach",
+      "target": "designer",
+      "label": null
+    },
+    {
+      "id": "e2",
+      "source": "designer",
+      "target": "approve",
+      "label": null
+    },
+    {
+      "id": "e3",
+      "source": "approve",
+      "target": "persist",
+      "label": null
+    },
+    {
+      "id": "e4",
+      "source": "persist",
+      "target": "end",
+      "label": null
+    }
+  ],
+  "is_active": true,
+  "mode": "GLOBAL",
+  "nodes": [
+    {
+      "config": {
+        "agent_name": "idea-coach",
+        "input_mapping": {
+          "title": {
+            "value": "start.payload.title",
+            "optional": false,
+            "type": "expression"
+          },
+          "source": {
+            "value": "start.payload.source",
+            "optional": true,
+            "type": "expression"
+          },
+          "context": {
+            "value": "start.payload.context",
+            "optional": true,
+            "type": "expression"
+          },
+          "idea_id": {
+            "value": "start.metadata.record_id",
+            "optional": false,
+            "type": "expression"
+          }
+        }
+      },
+      "id": "coach",
+      "label": "Refine the idea",
+      "position": null,
+      "type": "AGENT"
+    },
+    {
+      "config": {
+        "agent_name": "experiment-designer",
+        "input_mapping": {
+          "title": {
+            "value": "start.payload.title",
+            "optional": false,
+            "type": "expression"
+          },
+          "context": {
+            "value": "start.payload.context",
+            "optional": true,
+            "type": "expression"
+          },
+          "idea_id": {
+            "value": "start.metadata.record_id",
+            "optional": false,
+            "type": "expression"
+          },
+          "risk_level": {
+            "value": "start.payload.risk_level",
+            "optional": true,
+            "type": "expression"
+          },
+          "refined_question": {
+            "value": "start.payload.refined_question",
+            "optional": true,
+            "type": "expression"
+          }
+        }
+      },
+      "id": "designer",
+      "label": "Design smallest probe",
+      "position": null,
+      "type": "AGENT"
+    },
+    {
+      "config": {
+        "input_schema": {
+          "type": "object",
+          "required": [
+            "decision"
+          ],
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "decision": {
+              "enum": [
+                "approve",
+                "park"
+              ],
+              "type": "string"
+            },
+            "blast_radius": {
+              "enum": [
+                "solo",
+                "with_people",
+                "money",
+                "public"
+              ],
+              "type": "string",
+              "default": {
+                "type": "expression",
+                "value": "designer.blast_radius"
+              }
+            }
+          }
+        },
+        "assignee_pod_member_id": null,
+        "assignee_pod_member_id_expression": null,
+        "ui_schema": {
+          "ui:order": [
+            "decision",
+            "blast_radius",
+            "reason"
+          ]
+        }
+      },
+      "id": "approve",
+      "label": "Approve or park",
+      "position": null,
+      "type": "FORM"
+    },
+    {
+      "config": {
+        "function_name": "record_experiment",
+        "input_mapping": {
+          "setup": {
+            "value": "designer.setup",
+            "optional": false,
+            "type": "expression"
+          },
+          "idea_id": {
+            "value": "start.metadata.record_id",
+            "optional": false,
+            "type": "expression"
+          },
+          "approved": {
+            "value": "approve.decision == `approve`",
+            "optional": false,
+            "type": "expression"
+          },
+          "hypothesis": {
+            "value": "designer.hypothesis",
+            "optional": false,
+            "type": "expression"
+          },
+          "blast_radius": {
+            "value": "approve.blast_radius",
+            "optional": false,
+            "type": "expression"
+          },
+          "decision_reason": {
+            "value": "approve.reason",
+            "optional": true,
+            "type": "expression"
+          },
+          "time_estimate_minutes": {
+            "value": "designer.time_estimate_minutes",
+            "optional": false,
+            "type": "expression"
+          }
+        }
+      },
+      "id": "persist",
+      "label": "Create experiment or park",
+      "position": null,
+      "type": "FUNCTION"
+    },
+    {
+      "id": "end",
+      "config": {},
+      "label": "Done",
+      "position": null,
+      "type": "END"
+    }
+  ],
+  "start": {
+    "config": {
+      "table_name": "ideas",
+      "operations": [
+        "INSERT"
+      ]
+    },
+    "type": "DATASTORE_EVENT"
+  },
+  "visibility": "POD"
+}

@@ -1,0 +1,5 @@
+{
+  "comment": "Sample snapshot pulled from the pod while exporting — replaces the previously seeded 5 incidents. Total rows in this snapshot: see /me/incidents table.",
+  "exported_at": "2024-11-08T09:50:00Z",
+  "rows": []
+}

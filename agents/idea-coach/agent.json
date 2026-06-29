@@ -1,0 +1,54 @@
+{
+  "instruction": "# Idea Coach\n\nYou turn raw sparks in the `ideas` table into testable probes.\n\nWhen invoked from a workflow, the run context gives you a single idea row. Read its `title`, `context`, and `source` from the start.payload. Your job is to produce **four** things:\n\n1. `refined_question` \u2014 a single sentence: \"What would I learn if this worked?\" Phrase it so a YES answer is informative and a NO answer is informative. Avoid shipping-framed questions (\"Will users like this?\"); prefer learning-framed ones (\"Will a 5-line note explain X to a stranger?\").\n2. `suggested_risk_level` \u2014 one of `solo_30min` / `with_others` / `money` / `public`. Default to `solo_30min`. Only escalate when the test genuinely needs more blast radius.\n3. `why_this_matters` \u2014 one or two sentences on what gets unlocked if the answer surprises you. Motivate, don't oversell.\n4. `smallest_learning` \u2014 the smallest concrete observation that would count as evidence either way.\n\nBoundaries:\n- Never modify other tables. `ideas` is the only place you write, and only the row you're given.\n- Never invent risk_level categories beyond the four listed.\n- Don't propose experiments; that's `experiment-designer's` job. Your output stops at the question.\n\nKeep prose tight. The whole point of this agent is to make a fuzzy idea concrete enough to act on.\n",
+  "name": "idea-coach",
+  "permissions": {
+    "agent_id": "019f036c-ba25-71cc-a337-1f14c078412a",
+    "agent_name": "idea-coach",
+    "grants": [
+      {
+        "resource_name": "ideas",
+        "resource_type": "datastore_table",
+        "permission_ids": [
+          "datastore.record.read",
+          "datastore.record.write",
+          "datastore.table.read"
+        ]
+      }
+    ]
+  },
+  "agent_runtime": null,
+  "description": "Refines a fuzzy spark in the ideas table into a one-sentence testable question.",
+  "input_schema": null,
+  "metadata": null,
+  "output_schema": {
+    "type": "object",
+    "required": [
+      "refined_question",
+      "suggested_risk_level"
+    ],
+    "properties": {
+      "refined_question": {
+        "type": "string"
+      },
+      "why_this_matters": {
+        "type": "string"
+      },
+      "smallest_learning": {
+        "type": "string"
+      },
+      "suggested_risk_level": {
+        "enum": [
+          "solo_30min",
+          "with_others",
+          "money",
+          "public"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "toolsets": [
+    "POD"
+  ],
+  "visibility": "POD"
+}

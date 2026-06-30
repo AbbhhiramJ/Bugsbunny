@@ -2,10 +2,12 @@ import { loadIncidentRecords } from "./services/lemma.js";
 import { renderRoot } from "./services/renderer.js";
 import { createAppState } from "./services/state.js";
 import { renderLandingPage } from "./pages/landing.js";
+import { mountDemoPage, renderDemoPage, unmountDemoPage } from "./pages/demo.js";
 import { renderQueuePage } from "./pages/queue.js";
 
 const root = document.getElementById("root");
 const state = createAppState();
+let disposeDemoPage = null;
 
 renderRoot(root, '<div class="wrap"><div class="empty">Loading BuggsBunny queue…</div></div>');
 
@@ -25,7 +27,32 @@ async function boot() {
 
 function renderApp() {
   const snapshot = state.snapshot();
-  renderRoot(root, snapshot.page === "queue" ? renderQueuePage(snapshot) : renderLandingPage(snapshot));
+  if (disposeDemoPage) {
+    disposeDemoPage();
+    disposeDemoPage = null;
+  }
+
+  const pageMarkup =
+    snapshot.page === "demo"
+      ? renderDemoPage()
+      : snapshot.page === "queue"
+        ? renderQueuePage(snapshot)
+        : renderLandingPage(snapshot);
+
+  renderRoot(root, pageMarkup);
+
+  if (snapshot.page === "demo") {
+    disposeDemoPage = mountDemoPage(root, {
+      onComplete: () => {
+        state.openQueue("demo");
+        renderApp();
+      },
+      onSkip: () => {
+        state.openQueue("demo");
+        renderApp();
+      },
+    });
+  }
 }
 
 function bindInteractions() {
@@ -36,18 +63,31 @@ function bindInteractions() {
       const source = actionButton.getAttribute("data-source");
 
       if (action === "open-queue") {
+        if (source === "demo") {
+          state.startDemo();
+          renderApp();
+          return;
+        }
+
         state.openQueue(source === "demo" ? "demo" : "live");
         renderApp();
         return;
       }
 
       if (action === "set-source") {
+        if (state.snapshot().page === "queue" && source === "demo") {
+          state.startDemo();
+          renderApp();
+          return;
+        }
+
         state.setQueueSource(source === "demo" ? "demo" : "live");
         renderApp();
         return;
       }
 
       if (action === "home") {
+        unmountDemoPage();
         state.goHome();
         renderApp();
         return;

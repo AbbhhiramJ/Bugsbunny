@@ -39,6 +39,10 @@ export function createAppState() {
     setPage(page) {
       state.page = page;
     },
+    startDemo() {
+      state.preferredSource = "demo";
+      state.page = "demo";
+    },
     openQueue(sourcePreference) {
       state.preferredSource = sourcePreference || "live";
       state.page = "queue";

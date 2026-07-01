@@ -3,11 +3,13 @@ import { renderRoot } from "./services/renderer.js";
 import { createAppState } from "./services/state.js";
 import { renderLandingPage } from "./pages/landing.js";
 import { mountDemoPage, renderDemoPage, unmountDemoPage } from "./pages/demo.js";
+import { renderImportPage } from "./pages/import.js";
 import { renderQueuePage } from "./pages/queue.js";
 
 const root = document.getElementById("root");
 const state = createAppState();
 let disposeDemoPage = null;
+let selectedImportSource = "";
 
 renderRoot(root, '<div class="wrap"><div class="empty">Loading BuggsBunny queue…</div></div>');
 
@@ -35,6 +37,8 @@ function renderApp() {
   const pageMarkup =
     snapshot.page === "demo"
       ? renderDemoPage()
+      : snapshot.page === "import"
+        ? renderImportPage({ selectedSource: selectedImportSource })
       : snapshot.page === "queue"
         ? renderQueuePage(snapshot)
         : renderLandingPage(snapshot);
@@ -69,6 +73,13 @@ function bindInteractions() {
           return;
         }
 
+        if (actionButton.classList.contains("secondary-button")) {
+          selectedImportSource = "";
+          state.setPage("import");
+          renderApp();
+          return;
+        }
+
         state.openQueue(source === "demo" ? "demo" : "live");
         renderApp();
         return;
@@ -87,8 +98,15 @@ function bindInteractions() {
       }
 
       if (action === "home") {
+        selectedImportSource = "";
         unmountDemoPage();
         state.goHome();
+        renderApp();
+        return;
+      }
+
+      if (action === "select-import-source") {
+        selectedImportSource = actionButton.getAttribute("data-import-source") || "";
         renderApp();
         return;
       }
